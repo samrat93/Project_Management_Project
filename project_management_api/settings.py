@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'register',
     'home',
     'rest_framework',
+    'rest_framework.authtoken',
     
 ]
 
