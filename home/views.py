@@ -11,6 +11,7 @@ from register.models import Company
 from register.models import Project
 from register.models import UserProfile
 from projects.models import Task
+import psutil, os
 
 # Create your views here.
 def index(request):
@@ -22,12 +23,15 @@ def dashboard(request):
     companies = Company.objects.all()
     projects = Project.objects.all()
     tasks = Task.objects.all()
+    cup_usage = psutil.cpu_percent(4)
+    #print('jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj',cup_usage)
     context = {
         'users' : users,
         'active_users' : active_users,
         'companies' : companies,
         'projects' : projects,
         'tasks' : tasks,
+        'cpu_usage':cup_usage,
     }
     return render(request, 'core/dashboard.html', context)
 
@@ -84,3 +88,4 @@ def context(request): # send context to base.html
             'users_prof': users_prof,
         }
         return context
+

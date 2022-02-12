@@ -7,6 +7,7 @@ from .models import Invite
 from .forms import RegistrationForm
 from .forms import CompanyRegistrationForm
 from .forms import ProfilePictureForm
+from django.contrib.auth.decorators import login_required
 
 
 # Create your views here.
@@ -64,7 +65,7 @@ def profile(request):
         context = {'img_form' : img_form }
         return render(request, 'register/profile.html', context)
 
-
+@login_required
 def newCompany(request):
     if request.method == 'POST':
         form = CompanyRegistrationForm(request.POST)
