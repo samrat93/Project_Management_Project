@@ -10,6 +10,8 @@ urlpatterns = [
     path('dashboard/', views.dashboard, name='dashboard'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('forget-password', views.forget_password_view, name='forget-password'),
+    path('new-password', views.new_password_view, name='new-password'),
 ]
 
 

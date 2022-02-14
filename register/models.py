@@ -68,3 +68,4 @@ class Invite(models.Model):
     def __str__(self):
         """function to return the inviter"""
         return str(self.inviter)
+

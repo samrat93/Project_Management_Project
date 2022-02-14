@@ -1,3 +1,4 @@
+from distutils.log import error
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
@@ -12,6 +13,8 @@ from register.models import Project
 from register.models import UserProfile
 from projects.models import Task
 import psutil, os
+from django.contrib import messages
+from django.contrib.auth.hashers import make_password
 
 # Create your views here.
 def index(request):
@@ -54,6 +57,54 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse('home:index'))
+
+
+def forget_password_view(request):
+    
+    username = request.POST.get('username')
+    user_name = User.objects.filter(username = username).exists()
+    user = authenticate(request, username = user_name)
+    user = User.objects.get(username = request.user.username)
+    print('uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu',user)
+    error_message = None
+    if user:
+        if username == user.username:
+            u_id = request.session['username'] = user.id
+            print('iiiiiiiiiiiiiiiiiiiiiiii',u_id)
+            return redirect('home:new-password')
+        else:
+            error_message = 'Username not exist. Please try again !!!'
+    else:
+        error_message = 'Username not exist. Please try again !!!'
+    return render(request, 'register/forget_password.html',{'error':error_message})
+
+
+
+def new_password_view(request):
+    # # # get_session_id = request.session['username']
+    # # # data = User.objects.get(id = get_session_id)
+    
+    # password = request.POST.get('password')
+    # c_pass = request.POST.get('con_pass')
+    # # error_message = None
+    # # user = User(password = password)
+    # if password == c_pass:
+    #     # data.set_password(password)
+    #     # data.save()
+    #     return redirect('home:index')
+    # else:
+    #     error_message = 'Something went Wrong !!!'
+    # return render(request, 'register/new_password.html')
+    error_message = None
+    if request.POST:
+        password = request.POST.get('password')
+        c_pass = request.POST.get('con_pass')
+        if password == c_pass:
+            return redirect('home:index')
+        else:
+            messages.info(request,'Password not matching...')
+    else:
+        return render(request, 'register/new_password.html',{'error':error_message})
 
 
 def context(request): # send context to base.html

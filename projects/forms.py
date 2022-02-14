@@ -103,7 +103,7 @@ class ProjectRegistrationForm(forms.ModelForm):
         self.fields['name'].widget.attrs['class'] = 'form-control'
         self.fields['name'].widget.attrs['placeholder'] = 'Project Name'
         self.fields['efforts'].widget.attrs['class'] = 'form-control'
-        self.fields['efforts'].widget.attrs['placeholder'] = 'Efforts'
+        self.fields['efforts'].widget.attrs['placeholder'] = 'Team Efforts (HH:MM:SS)'
         self.fields['status'].widget.attrs['class'] = 'form-control'
         self.fields['status'].widget.attrs['placeholder'] = 'Status'
         self.fields['dead_line'].widget.attrs['class'] = 'form-control'
