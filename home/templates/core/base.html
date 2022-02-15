@@ -88,7 +88,10 @@
           <div class="dropdown-header text-center">
             <strong>Settings</strong>
           </div>
+          {% if user.is_superuser %}
+          {% else %}
           <a class="dropdown-item" href="{% url 'register:profile' %}"><i class="fa fa-user"></i> Profile</a>
+          {%endif%}
           <a class="dropdown-item" href="{% url 'home:change-password' %}"><i class="fa fa-asterisk"></i> Change Password</a>
           <!-- <a class="dropdown-item" href="#"><i class="fa fa-usd"></i> Payments<span class="badge badge-secondary">42</span></a> -->
           <a class="dropdown-item" href="{% url 'projects:projects'%}"><i class="fa fa-file"></i> Projects<span class="badge badge-primary">{{projects.count}}</span></a>
