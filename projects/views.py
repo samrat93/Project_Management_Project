@@ -24,8 +24,11 @@ def projects(request):
     }
     return render(request, 'projects/projects.html', context)
 
+
 @login_required
 def newTask(request):
+    """ Function to create new task """
+
     if request.method == 'POST':
         form = TaskRegistrationForm(request.POST)
         context = {'form': form}
@@ -49,6 +52,8 @@ def newTask(request):
 
 @login_required
 def newProject(request):
+    """ Function to create new project """
+    
     if request.method == 'POST':
         form = ProjectRegistrationForm(request.POST)
         context = {'form': form}

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth import login
 from django.shortcuts import redirect
-from projects.models import Task
+from projects.models import Project, Task
 from .models import UserProfile
 from .models import Invite
 from .forms import RegistrationForm
@@ -12,6 +12,8 @@ from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def register(request):
+    """Register user using django-registration"""
+
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         context = {'form':form}
@@ -32,6 +34,7 @@ def register(request):
 
 
 def usersView(request):
+    """Function to display users list in home/index"""
     users = UserProfile.objects.all()
     tasks = Task.objects.all()
     context = {
@@ -39,6 +42,7 @@ def usersView(request):
         'tasks': tasks,
     }
     return render(request, 'register/users.html', context)
+
 
 def user_view(request, profile_id):
     user = UserProfile.objects.get(id=profile_id)
@@ -49,6 +53,8 @@ def user_view(request, profile_id):
 
 
 def profile(request):
+    """Function to display users profile"""
+
     if request.method == 'POST':
         img_form = ProfilePictureForm(request.POST, request.FILES)
         print('PRINT 1: ', img_form)
@@ -65,8 +71,11 @@ def profile(request):
         context = {'img_form' : img_form }
         return render(request, 'register/profile.html', context)
 
+
 @login_required
 def newCompany(request):
+    """Function to create new company using django-CompanyRegistrationForm"""
+
     if request.method == 'POST':
         form = CompanyRegistrationForm(request.POST)
         context = {'form':form}
@@ -94,6 +103,8 @@ def invites(request):
 
 
 def invite(request, profile_id):
+    """Function to view invite friends"""
+
     profile_to_invite = UserProfile.objects.get(id=profile_id)
     logged_profile = get_active_profile(request)
     if not profile_to_invite in logged_profile.friends.all():
@@ -102,28 +113,39 @@ def invite(request, profile_id):
 
 
 def deleteInvite(request, invite_id):
+    """Function to delete invitation """
+
     logged_user = get_active_profile(request)
     logged_user.received_invites.get(id=invite_id).delete()
     return render(request, 'register/invites.html')
 
 
 def acceptInvite(request, invite_id):
+    """Function to accept invitation """
+
     invite = Invite.objects.get(id=invite_id)
     invite.accept()
     return redirect('register:invites')
 
+
 def remove_friend(request, profile_id):
+    """Function to remove friend from friend list """
+
     user = get_active_profile(request)
     user.remove_friend(profile_id)
     return redirect('register:friends')
 
 
 def get_active_profile(request):
+    """Function to get profile"""
+
     user_id = request.user.userprofile_set.values_list()[0][0]
     return UserProfile.objects.get(id=user_id)
 
 
 def friends(request):
+    """Function to show friends list"""
+    
     if request.user.is_authenticated:
         user = get_active_profile(request)
         friends = user.friends.all()

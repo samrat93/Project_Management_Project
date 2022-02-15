@@ -1,4 +1,7 @@
+from ast import Assign
+from asyncio import tasks
 from distutils.log import error
+from tokenize import group
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.contrib.auth.models import User
@@ -7,20 +10,31 @@ from django.contrib.auth import logout
 from django.contrib.auth import authenticate
 from django.contrib.auth import login
 from django.urls import reverse
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from register.models import Company
 from register.models import Project
 from register.models import UserProfile
 from projects.models import Task
 import psutil, os
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 
-# Create your views here.
+
+
+
+
 def index(request):
-    return render(request, 'core/index.html')
+    """ Function to display index """
+
+    projects = Project.objects.all()
+    return render(request, 'core/index.html',{'projects':projects})
+
 
 def dashboard(request):
+    """ Function to display dashboard of the website """
+
     users = User.objects.all()
     active_users = User.objects.all().filter(is_active=True)
     companies = Company.objects.all()
@@ -39,8 +53,9 @@ def dashboard(request):
     return render(request, 'core/dashboard.html', context)
 
 
-
 def login_view(request):
+    """ Function to login user """
+
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -55,56 +70,54 @@ def login_view(request):
 
 
 def logout_view(request):
+    """ Function to logout user """
+
     logout(request)
     return HttpResponseRedirect(reverse('home:index'))
 
 
 def forget_password_view(request):
-    
-    username = request.POST.get('username')
-    user_name = User.objects.filter(username = username).exists()
-    user = authenticate(request, username = user_name)
-    user = User.objects.get(username = request.user.username)
-    print('uuuuuuuuuuuuuuuuuuuuuuuuuuuuuu',user)
-    error_message = None
-    if user:
-        if username == user.username:
-            u_id = request.session['username'] = user.id
-            print('iiiiiiiiiiiiiiiiiiiiiiii',u_id)
-            return redirect('home:new-password')
-        else:
-            error_message = 'Username not exist. Please try again !!!'
-    else:
-        error_message = 'Username not exist. Please try again !!!'
-    return render(request, 'register/forget_password.html',{'error':error_message})
+    """ Function to check username and redirect to password reset page """
 
+    if request.method == "POST":
+        username = request.POST.get('username')
+        try:
+            user = User.objects.get(username = username)
+        except ObjectDoesNotExist:
+            messages.warning(request, 'Please Create your account first !!!')
+            return render(request, 'register/forget_password.html')
+        if user:
+            if username == user.username:
+                request.session['user'] = user.id
+                return redirect('home:new-password')
+            else:
+                messages.info(request, 'Username not found !!!')
+                return render(request, 'register/forget_password.html')
+        else:
+            messages.info(request, 'Username not found !!!')
+    return render(request, 'register/forget_password.html')
 
 
 def new_password_view(request):
-    # # # get_session_id = request.session['username']
-    # # # data = User.objects.get(id = get_session_id)
-    
-    # password = request.POST.get('password')
-    # c_pass = request.POST.get('con_pass')
-    # # error_message = None
-    # # user = User(password = password)
-    # if password == c_pass:
-    #     # data.set_password(password)
-    #     # data.save()
-    #     return redirect('home:index')
-    # else:
-    #     error_message = 'Something went Wrong !!!'
-    # return render(request, 'register/new_password.html')
-    error_message = None
-    if request.POST:
-        password = request.POST.get('password')
-        c_pass = request.POST.get('con_pass')
-        if password == c_pass:
+    """ Function to reset new password """
+
+    u_id = request.session['user']
+    user = User.objects.get(id = u_id)
+
+    if request.method == "POST":
+        pwd = request.POST.get('new_password')
+        c_pwd = request.POST['con_pass']
+        error_message = None
+        if pwd == c_pwd:
+            enccrypt_pwd = make_password(pwd)
+            user.password = enccrypt_pwd
+            user.save()
+            messages.success(request, 'Password Reset Successfully.')
             return redirect('home:index')
         else:
-            messages.info(request,'Password not matching...')
-    else:
-        return render(request, 'register/new_password.html',{'error':error_message})
+            messages.warning(request, 'Password does not match')
+            return redirect('home:new-password')
+    return render(request, 'register/new_password.html')
 
 
 def context(request): # send context to base.html
@@ -140,3 +153,53 @@ def context(request): # send context to base.html
         }
         return context
 
+
+@login_required
+def change_password_view(request):
+    """ Function to change password of logedin user """
+
+    if request.user.is_authenticated:
+        if request.method == 'POST':
+            old_password = request.POST['old_password']
+            new_password = request.POST['new_password']
+            con_pass = request.POST['con_pass']
+            if new_password == con_pass:
+                user = authenticate(request, username= request.user, password = old_password)
+                if user is not None:
+                    user = User.objects.get(username = request.user.username)
+                    user.set_password(new_password)
+                    user.is_visit = True
+                    user.save()
+                    messages.success(request, "Password Has Been Changed")
+                    return redirect('home:index')
+                else:
+                    messages.warning(request, "Old password not match !!!")
+                    return redirect('home:change-password')
+            else:
+                messages.warning(request, "Password does not match")
+                return redirect('home:change-password')
+        else:
+            # messages.success(request, "Something went wrong !!!")
+            return render(request, 'register/change_password.html')
+    else:
+        return render(request, 'register/change_password.html')
+    
+
+def user_task_view(request):
+    """ Function to show the assigned task of logged in user """
+    
+    u_id = request.user.id
+    task_details = Task.objects.all()
+    projects = Project.objects.all()
+    user_task = Task.objects.filter(assign = u_id)
+    context = {
+        'projects' : projects,
+        'user_task' : user_task,
+    }
+
+    print('current user id : ', u_id)
+    print('Task assigned to user : ',user_task)
+    if request.user.is_authenticated:
+        return render(request, 'core/user_task.html',context)
+    else:
+        return render(request, 'core/index.html')

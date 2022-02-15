@@ -8,7 +8,7 @@ class Company(models.Model):
 
 
     social_name = models.CharField(max_length=80)
-    name = models.CharField(max_length=80)
+    name = models.CharField(max_length=80,unique = True)
     email = models.EmailField()
     city = models.CharField(max_length=50)
     found_date = models.DateField()

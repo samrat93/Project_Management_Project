@@ -1,0 +1,70 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Home</li>
+{% endblock breadcrumb%}
+
+{% block content %}
+<div class="container-fluid">
+  <div id="ui-view" style="opacity: 1;"><div class="animated fadeIn">
+    <div class="row">
+    <div class="col-12">
+      <div class="card">
+      <div class="card-header">
+        <i class="fa fa-align-justify"></i> Task Assign To - {{user.username}}
+        <div class="card-actions">
+          <!-- <a href="" target="_blank">
+            <small class="text-muted">docs</small>
+          </a> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="jumbotron bg-white">
+          <!-- <h1 class="display-4">LaNet Software Solution Pvt.Ltd.</h1>
+          <p class="lead">Welcome to the Project Management System.</p>
+          <hr class="my-4"> -->
+          <div>
+            <img src="{% static 'core/img/avatar/pm.jpg' %}" width="auto" class="img-fluid" alt="Responsive image">
+          </div>
+          <!-- <p>Register your company and start managing your projects</p>
+          <p>That's it, simple, easy, fast.</p>
+          <p class="lead">
+            <a class="btn btn-primary btn-lg" href="{% url 'register:new-company' %}" role="button">Set up your company</a>
+          </p>
+          {% if not user.is_authenticated %}
+          <a href="{% url 'home:login' %}">Click here if you are already registered</a>
+          {% endif %} -->
+          <h3 class="display-5 text-center m-5">Task Lists Assigned To You {{user.first_name}}</h3>
+          <table class="table table-hover">
+            <thead>
+              <tr style="background-color: orange;">
+                <th scope="col">S.N</th>
+                <th scope="col">Project Name</th>
+                <th scope="col">Task Name</th>
+                <th scope="col">Status</th>
+                <th scope="col">Due</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for task in user_task %}
+              <tr>
+                <th class="h6" scope="row">{{forloop.counter}}</th>
+                <td class="h6">{{task.project.name}}</td>
+                <td class="h6">{{task.task_name}}</td>
+                <td class="h6">{{task.get_status_display}}</td>
+                <td class="h6">{{task.get_due_display}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+    </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

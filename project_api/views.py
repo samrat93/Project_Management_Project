@@ -25,18 +25,16 @@ class UserLoginApiView(ObtainAuthToken):
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
 
 
-
 class CompanyApiViewSet(viewsets.ModelViewSet):
-    """Class based viewset of company model"""
+    """ Class based viewset of company model """
 
     serializer_class = CompanySerializer
     queryset = Company.objects.all()
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
+    permission_classes = [permissions.IsAdminUser]
 
 
 class UserProfileViewSet(viewsets.ModelViewSet):
-    """Hangle creating and updating user profiles"""
+    """ Hangle creating and updating user profiles """
 
     serializer_class = UserProfileSerializer
     queryset = User.objects.all()
@@ -46,9 +44,8 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     #search_fields = ('name','email',)
 
 
-
 class InviteApiViewSet(viewsets.ModelViewSet):
-    """View Class of Invite api serializer"""
+    """ View Class of Invite api serializer """
 
     queryset = Invite.objects.all()
     serializer_class = InviteSerializer
@@ -56,11 +53,11 @@ class InviteApiViewSet(viewsets.ModelViewSet):
 
 
 class ProjectApiViewViewSet(viewsets.ModelViewSet):
-    """View Class of Project api serializer"""
+    """ View Class of Project api serializer """
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly] 
+    permission_classes = [permissions.IsAdminUser] 
 
 
 class TaskApiViewSet(viewsets.ModelViewSet):
